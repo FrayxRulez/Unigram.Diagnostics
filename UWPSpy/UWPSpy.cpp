@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#include "MainDlg.h"
 #include "tap.hpp"
 
 using PFN_INITIALIZE_XAML_DIAGNOSTICS_EX =
@@ -146,8 +145,8 @@ HRESULT WINAPI start(DWORD pid, DWORD framework) {
                 return TRUE;
             }
 
-            data.found = TRUE;
-            PostMessage(hWnd, CMainDlg::UWM_ACTIVATE_WINDOW, 0, 0);
+            //data.found = TRUE;
+            //PostMessage(hWnd, CMainDlg::UWM_ACTIVATE_WINDOW, 0, 0);
             return TRUE;
         },
         reinterpret_cast<LPARAM>(&data));

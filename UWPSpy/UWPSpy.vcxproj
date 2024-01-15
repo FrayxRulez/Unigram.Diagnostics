@@ -220,9 +220,6 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AboutDlg.cpp" />
-    <ClCompile Include="flash_area.cpp" />
-    <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="module.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -236,9 +233,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\version.h" />
-    <ClInclude Include="AboutDlg.h" />
-    <ClInclude Include="flash_area.h" />
-    <ClInclude Include="MainDlg.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="simplefactory.hpp" />
     <ClInclude Include="stdafx.h" />

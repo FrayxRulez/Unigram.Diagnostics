@@ -1,7 +1,8 @@
 #pragma once
 
-#include "MainDlg.h"
 #include "winrt.hpp"
+
+#include <deque>
 
 struct VisualTreeWatcher : winrt::implements<VisualTreeWatcher,
                                              IVisualTreeServiceCallback2,
@@ -37,11 +38,20 @@ struct VisualTreeWatcher : winrt::implements<VisualTreeWatcher,
         return obj.as<T>();
     }
 
-    CMainDlg* DlgMainForCurrentThread();
-    void OnDlgMainFinalMessage(HWND hWnd);
+    void ElementAdded(const ParentChildRelation& parentChildRelation,
+                      const VisualElement& element);
+    void ElementRemoved(InstanceHandle handle);
+
+    std::wstring FindPathToRoot(InstanceHandle parent);
 
     winrt::com_ptr<IXamlDiagnostics> m_xamlDiagnostics;
 
     std::shared_mutex m_dlgMainMutex;
-    std::unordered_map<DWORD, CMainDlg> m_dlgMainForEachThread;
+    wux::Application::UnhandledException_revoker m_unhandledException;
+    std::unordered_map<InstanceHandle,
+                       wux::FrameworkElement::SizeChanged_revoker>
+        m_sizeChangedTokens;
+    std::unordered_map<InstanceHandle, std::wstring> m_pathToRoot;
+    std::unordered_map<InstanceHandle, InstanceHandle> m_childToParent;
+    std::deque<std::wstring> m_history;
 };

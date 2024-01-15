@@ -21,9 +21,6 @@
     <ClCompile Include="UWPSpy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MainDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="visualtreewatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -33,18 +30,9 @@
     <ClCompile Include="tap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="flash_area.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AboutDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MainDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -62,16 +50,10 @@
     <ClInclude Include="tap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="flash_area.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\version.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AboutDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

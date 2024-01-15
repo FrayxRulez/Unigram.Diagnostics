@@ -2,36 +2,33 @@
 
 #include "visualtreewatcher.hpp"
 
+#include <winrt/Windows.Storage.h>
+#include <fstream>
+
 #define EXTRA_DEBUG 0
-
-namespace {
-
-// https://stackoverflow.com/a/10444161
-ULONG_PTR EnableVisualStyles() {
-    TCHAR dir[MAX_PATH];
-    ULONG_PTR ulpActivationCookie = FALSE;
-    ACTCTX actCtx = {sizeof(actCtx),
-                     ACTCTX_FLAG_RESOURCE_NAME_VALID |
-                         ACTCTX_FLAG_SET_PROCESS_DEFAULT |
-                         ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID,
-                     TEXT("shell32.dll"),
-                     0,
-                     0,
-                     dir,
-                     (LPCTSTR)124};
-    UINT cch = GetSystemDirectory(dir, sizeof(dir) / sizeof(*dir));
-    if (cch >= sizeof(dir) / sizeof(*dir)) {
-        return FALSE; /*shouldn't happen*/
-    }
-    dir[cch] = TEXT('\0');
-    ActivateActCtx(CreateActCtx(&actCtx), &ulpActivationCookie);
-    return ulpActivationCookie;
-}
-
-}  // namespace
 
 VisualTreeWatcher::VisualTreeWatcher(winrt::com_ptr<IUnknown> site)
     : m_xamlDiagnostics(site.as<IXamlDiagnostics>()) {
+    m_unhandledException = wux::Application::Current().UnhandledException(
+        winrt::auto_revoke, [this](wf::IInspectable const& sender,
+                                   wux::UnhandledExceptionEventArgs const& e) {
+            auto exception = e.Exception();
+            if (exception == 0x802B0014) {
+                std::wstring path =
+                    winrt::Windows::Storage::ApplicationData::Current()
+                        .LocalFolder()
+                        .Path()
+                        .c_str();
+                std::wofstream f(path + L"\\LayoutCycle.txt",
+                                 std::wofstream::out | std::wofstream::trunc);
+
+                for (auto& item : m_history) {
+                    f << item << L"\n";
+                }
+
+                f.close();
+            }
+        });
     // const auto treeService = m_xamlDiagnostics.as<IVisualTreeService3>();
     // winrt::check_hresult(treeService->AdviseVisualTreeChange(this));
 
@@ -55,18 +52,10 @@ VisualTreeWatcher::VisualTreeWatcher(winrt::com_ptr<IUnknown> site)
 
 void VisualTreeWatcher::Activate() {
     std::shared_lock lock(m_dlgMainMutex);
-
-    for (auto& [threadId, dlgMain] : m_dlgMainForEachThread) {
-        dlgMain.PostMessage(CMainDlg::UWM_ACTIVATE_WINDOW);
-    }
 }
 
 VisualTreeWatcher::~VisualTreeWatcher() {
     std::shared_lock lock(m_dlgMainMutex);
-
-    for (auto& [threadId, dlgMain] : m_dlgMainForEachThread) {
-        dlgMain.SendMessage(CMainDlg::UWM_DESTROY_WINDOW);
-    }
 }
 
 HRESULT VisualTreeWatcher::OnVisualTreeChange(
@@ -160,19 +149,13 @@ HRESULT VisualTreeWatcher::OnVisualTreeChange(
     }
 #endif  // EXTRA_DEBUG
 
-    auto* dlgMain = DlgMainForCurrentThread();
-
     switch (mutationType) {
         case Add:
-            if (dlgMain) {
-                dlgMain->ElementAdded(parentChildRelation, element);
-            }
+            ElementAdded(parentChildRelation, element);
             break;
 
         case Remove:
-            if (dlgMain) {
-                dlgMain->ElementRemoved(element.Handle);
-            }
+            ElementRemoved(element.Handle);
             break;
 
         default:
@@ -195,75 +178,103 @@ HRESULT VisualTreeWatcher::OnElementStateChanged(InstanceHandle,
     return S_OK;
 }
 
-CMainDlg* VisualTreeWatcher::DlgMainForCurrentThread() {
-    DWORD dwCurrentThreadId = GetCurrentThreadId();
-
-    {
-        std::shared_lock lock(m_dlgMainMutex);
-
-        auto it = m_dlgMainForEachThread.find(dwCurrentThreadId);
-        if (it != m_dlgMainForEachThread.end()) {
-            return &it->second;
-        }
-    }
-
-    std::unique_lock lock(m_dlgMainMutex);
-
-    auto [it, inserted] = m_dlgMainForEachThread.try_emplace(
-        dwCurrentThreadId, m_xamlDiagnostics, this);
-
-    CMainDlg& dlgMain = it->second;
-
-    if (!inserted) {
-        ATLASSERT(FALSE);
-        return &dlgMain;
-    }
-
-    HWND hChildWnd = nullptr;
-
-    UINT32 length = 0;
-    if (GetCurrentPackageFullName(&length, nullptr) !=
-        APPMODEL_ERROR_NO_PACKAGE) {
-        // Packaged UWP processes seem to lack visual styles, which causes
-        // artifacts such as black squares and UI flickering. This call fixes
-        // it.
-        EnableVisualStyles();
-
-        // Creating a dialog without a parent causes it to be occluded. Using
-        // the core window as a parent window fixes it.
-        if (const auto coreInterop =
-                winrt::Windows::UI::Core::CoreWindow::GetForCurrentThread()
-                    .try_as<ICoreWindowInterop>()) {
-            coreInterop->get_WindowHandle(&hChildWnd);
-        }
-    }
-
-    if (!dlgMain.Create(hChildWnd)) {
-        ATLTRACE(L"Main dialog creation failed!\n");
-        m_dlgMainForEachThread.erase(it);
-        return nullptr;
-    }
-
-    dlgMain.SetOnFinalMessageCallback([](void* param, HWND hWnd) {
-        reinterpret_cast<VisualTreeWatcher*>(param)->OnDlgMainFinalMessage(
-            hWnd);
-    });
-
-    dlgMain.ShowWindow(SW_SHOWDEFAULT);
-    SetForegroundWindow(dlgMain.m_hWnd);
-    return &dlgMain;
+inline void OutputDebugStringFormat(LPCWSTR pwhFormat, ...) {
+    va_list args;
+    va_start(args, pwhFormat);
+    WCHAR buffer[1024];
+    vswprintf_s(buffer, 1024, pwhFormat, args);
+    OutputDebugStringW(buffer);
+    va_end(args);
 }
 
-void VisualTreeWatcher::OnDlgMainFinalMessage(HWND hWnd) {
-    DWORD dwCurrentThreadId = GetCurrentThreadId();
+void VisualTreeWatcher::ElementAdded(
+    const ParentChildRelation& parentChildRelation,
+    const VisualElement& element) {
+    wux::FrameworkElement frameworkElement = nullptr;
 
-    std::unique_lock lock(m_dlgMainMutex);
+    const auto inspectable = FromHandle<wf::IInspectable>(element.Handle);
+    frameworkElement = inspectable.try_as<wux::FrameworkElement>();
 
-    auto it = m_dlgMainForEachThread.find(dwCurrentThreadId);
-    if (it == m_dlgMainForEachThread.end()) {
-        ATLASSERT(FALSE);
-        return;
+    if (frameworkElement) {
+        const std::wstring_view elementType{
+            element.Type, element.Type ? SysStringLen(element.Type) : 0};
+        const std::wstring_view elementName{
+            element.Name, element.Name ? SysStringLen(element.Name) : 0};
+
+        std::wstring path;
+
+        if (!elementName.empty()) {
+            path += elementName;
+            path += L" (";
+        }
+
+        size_t index = elementType.find_last_of('.');
+        if (index >= 0) {
+            path += elementType.substr(index + 1);
+        } else {
+            path += elementType;
+        }
+
+        if (!elementName.empty()) {
+            path += L")";
+        }
+
+        m_pathToRoot[element.Handle] = path;
+
+        if (!parentChildRelation.Parent) {
+            return;
+        }
+
+        auto handle = element.Handle;
+
+        m_childToParent[element.Handle] = parentChildRelation.Parent;
+        m_sizeChangedTokens[element.Handle] = frameworkElement.SizeChanged(
+            winrt::auto_revoke,
+            [this, handle](IInspectable const& sender,
+                           wux::SizeChangedEventArgs const& args) {
+                auto previous = args.PreviousSize();
+                if (previous.Width > 0 || previous.Height > 0) {
+                    auto path = FindPathToRoot(handle);
+
+#if EXTRA_DEBUG
+                    OutputDebugStringFormat(L"SizeChanged for %s\n",
+                                            path.c_str());
+#endif
+
+                    if (!m_history.empty()) {
+                        const auto& peek = m_history.back();
+                        size_t index = path.find(peek);
+                        if (index == 0 && path.size() > peek.size()) {
+                            m_history.pop_back();
+                        }
+                    }
+
+                    m_history.push_back(path);
+
+                    while (200 < m_history.size()) {
+                        m_history.pop_front();
+                    }
+                }
+            });
+    }
+}
+
+void VisualTreeWatcher::ElementRemoved(InstanceHandle handle) {
+    m_pathToRoot.erase(handle);
+    m_childToParent.erase(handle);
+    m_sizeChangedTokens.erase(handle);
+}
+
+std::wstring VisualTreeWatcher::FindPathToRoot(InstanceHandle parent) {
+    auto find = m_pathToRoot.find(parent);
+    if (find != m_pathToRoot.end()) {
+        auto path = m_childToParent.find(parent);
+        if (path != m_childToParent.end()) {
+            return FindPathToRoot(path->second) + L"/" + find->second;
+        }
+
+        return find->second;
     }
 
-    m_dlgMainForEachThread.erase(it);
+    return L"";
 }
