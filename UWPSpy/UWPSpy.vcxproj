@@ -232,7 +232,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\version.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="simplefactory.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="tap.hpp" />
@@ -241,15 +240,7 @@
     <ClInclude Include="winrt.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="UWPSpy.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\selbox.png" />
-    <Image Include="res\UWPSpy.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
-    <None Include="UWPSpy.rc2" />
     <None Include="_exports.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
