@@ -64,29 +64,6 @@ HRESULT UwpInitializeXamlDiagnostics(DWORD pid, PCWSTR dllLocation) {
                 CLSID_UWPSpyTAP, nullptr);
 }
 
-HRESULT WinUIInitializeXamlDiagnostics(DWORD pid, PCWSTR dllLocation) {
-    WCHAR microsoftInternalFrameworkUdkPath[MAX_PATH];
-    if (!GetLoadedDllPath(pid, L"Microsoft.Internal.FrameworkUdk.dll",
-                          microsoftInternalFrameworkUdkPath)) {
-        return HRESULT_FROM_WIN32(ERROR_MOD_NOT_FOUND);
-    }
-
-    const HMODULE mux(LoadLibraryEx(microsoftInternalFrameworkUdkPath, nullptr,
-                                    LOAD_WITH_ALTERED_SEARCH_PATH));
-    if (!mux) {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
-
-    const auto ixde = reinterpret_cast<PFN_INITIALIZE_XAML_DIAGNOSTICS_EX>(
-        GetProcAddress(mux, "InitializeXamlDiagnosticsEx"));
-    if (!ixde) {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
-
-    return ixde(L"WinUIVisualDiagConnection1", pid, L"", dllLocation,
-                CLSID_UWPSpyTAP, nullptr);
-}
-
 }  // namespace
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,  // handle to DLL module
@@ -171,9 +148,6 @@ HRESULT WINAPI start(DWORD pid, DWORD framework) {
     switch (framework) {
         case kFrameworkUWP:
             return UwpInitializeXamlDiagnostics(pid, location);
-
-        case kFrameworkWinUI:
-            return WinUIInitializeXamlDiagnostics(pid, location);
     }
 
     return E_INVALIDARG;
