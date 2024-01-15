@@ -70,7 +70,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\WTL10\Include;$(IncludePath)</IncludePath>
+    <IncludePath>..\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -82,7 +82,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\WTL10\Include;$(IncludePath)</IncludePath>
+    <IncludePath>..\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -110,11 +110,11 @@
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <HeaderFileName>UWPSpy.h</HeaderFileName>
-      <InterfaceIdentifierFileName>UWPSpy_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>UWPSpy_p.c</ProxyFileName>
+      <HeaderFileName>Telegram.Diagnostics.h</HeaderFileName>
+      <InterfaceIdentifierFileName>Telegram.Diagnostics_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>Telegram.Diagnostics_p.c</ProxyFileName>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)/UWPSpy.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)/Telegram.Diagnostics.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
   </ItemDefinitionGroup>
@@ -145,11 +145,11 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <HeaderFileName>UWPSpy.h</HeaderFileName>
-      <InterfaceIdentifierFileName>UWPSpy_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>UWPSpy_p.c</ProxyFileName>
+      <HeaderFileName>Telegram.Diagnostics.h</HeaderFileName>
+      <InterfaceIdentifierFileName>Telegram.Diagnostics_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>Telegram.Diagnostics_p.c</ProxyFileName>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)/UWPSpy.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)/Telegram.Diagnostics.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
   </ItemDefinitionGroup>
@@ -178,11 +178,11 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <HeaderFileName>UWPSpy.h</HeaderFileName>
-      <InterfaceIdentifierFileName>UWPSpy_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>UWPSpy_p.c</ProxyFileName>
+      <HeaderFileName>Telegram.Diagnostics.h</HeaderFileName>
+      <InterfaceIdentifierFileName>Telegram.Diagnostics_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>Telegram.Diagnostics_p.c</ProxyFileName>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)/UWPSpy.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)/Telegram.Diagnostics.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
   </ItemDefinitionGroup>
@@ -210,11 +210,11 @@
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <HeaderFileName>UWPSpy.h</HeaderFileName>
-      <InterfaceIdentifierFileName>UWPSpy_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>UWPSpy_p.c</ProxyFileName>
+      <HeaderFileName>Telegram.Diagnostics.h</HeaderFileName>
+      <InterfaceIdentifierFileName>Telegram.Diagnostics_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>Telegram.Diagnostics_p.c</ProxyFileName>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)/UWPSpy.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)/Telegram.Diagnostics.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
   </ItemDefinitionGroup>
@@ -227,7 +227,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="tap.cpp" />
-    <ClCompile Include="UWPSpy.cpp" />
+    <ClCompile Include="Telegram.Diagnostics.cpp" />
     <ClCompile Include="visualtreewatcher.cpp" />
   </ItemGroup>
   <ItemGroup>

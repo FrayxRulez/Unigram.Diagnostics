@@ -45,20 +45,20 @@ bool ProcessSpy(HWND hWnd, DWORD pid, ProcessSpyFramework framework) {
 
     PWSTR filename = PathFindFileName(path);
 
-    wcscpy_s(filename, ARRAYSIZE(path) - (filename - path), L"UWPSpy.dll");
+    wcscpy_s(filename, ARRAYSIZE(path) - (filename - path), L"Telegram.Diagnostics.dll");
 
     if (GetFileAttributes(path) == INVALID_FILE_ATTRIBUTES) {
-        MessageBox(hWnd, L"UWPSpy.dll is missing", L"Error", MB_ICONERROR);
+        MessageBox(hWnd, L"Telegram.Diagnostics.dll is missing", L"Error", MB_ICONERROR);
         return false;
     }
 
     if (!AllowAppContainerAccess(path)) {
         PCWSTR warningMsg =
-            L"Failed to adjust the file permissions for UWPSpy.dll. A UWP "
+            L"Failed to adjust the file permissions for Telegram.Diagnostics.dll. A UWP "
             L"application running in a sandboxed AppContainer environment "
             L"might not be able to load the module.\n"
             L"\n"
-            L"If UWPSpy is running from a USB flash drive or a network drive, "
+            L"If Telegram.Diagnostics is running from a USB flash drive or a network drive, "
             L"consider copying it to the main system drive and running it from "
             L"there.\n"
             L"\n"
@@ -71,7 +71,7 @@ bool ProcessSpy(HWND hWnd, DWORD pid, ProcessSpyFramework framework) {
 
     HMODULE lib = LoadLibrary(path);
     if (!lib) {
-        MessageBox(hWnd, L"Failed to load UWPSpy.dll", L"Error", MB_ICONERROR);
+        MessageBox(hWnd, L"Failed to load Telegram.Diagnostics.dll", L"Error", MB_ICONERROR);
         return false;
     }
 
@@ -81,7 +81,7 @@ bool ProcessSpy(HWND hWnd, DWORD pid, ProcessSpyFramework framework) {
         (isDebugging_proc_t)GetProcAddress(lib, "isDebugging");
     if (isDebugging && isDebugging(pid)) {
         PCWSTR warningMsg =
-            L"UWPSpy is already inspecting the target process. To start a new "
+            L"Telegram.Diagnostics is already inspecting the target process. To start a new "
             L"inspection session, relaunch the target application.\n"
             L"\n"
             L"Resume the existing inspection session?";

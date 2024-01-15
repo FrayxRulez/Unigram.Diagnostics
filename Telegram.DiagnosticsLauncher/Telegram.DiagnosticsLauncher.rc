@@ -38,7 +38,7 @@ END
 
 3 TEXTINCLUDE 
 BEGIN
-    "#include ""UWPSpyLauncher.rc2""\r\n"
+    "#include ""Telegram.DiagnosticsLauncher.rc2""\r\n"
     "\0"
 END
 
@@ -52,7 +52,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\UWPSpyLauncher.ico"
+IDR_MAINFRAME           ICON                    "res\\Telegram.DiagnosticsLauncher.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ IDR_MAINFRAME           ICON                    "res\\UWPSpyLauncher.ico"
 
 IDD_MAINDLG DIALOGEX 0, 0, 256, 144
 STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
-CAPTION "UWPSpy"
+CAPTION "Telegram.Diagnostics"
 FONT 9, "Segoe UI", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_PROCESS_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,242,98
@@ -137,7 +137,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDR_MAINFRAME           "UWPSpyLauncher"
+    IDR_MAINFRAME           "Telegram.DiagnosticsLauncher"
 END
 
 STRINGTABLE
@@ -228,7 +228,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "UWPSpyLauncher.rc2"
+#include "Telegram.DiagnosticsLauncher.rc2"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

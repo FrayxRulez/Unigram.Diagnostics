@@ -61,7 +61,7 @@ HRESULT UwpInitializeXamlDiagnostics(DWORD pid, PCWSTR dllLocation) {
     }
 
     return ixde(L"VisualDiagConnection1", pid, L"", dllLocation,
-                CLSID_UWPSpyTAP, nullptr);
+                CLSID_Telegram_DiagnosticsTAP, nullptr);
 }
 
 }  // namespace
@@ -75,7 +75,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,  // handle to DLL module
             HRESULT hRes = _Module.Init(nullptr, hinstDLL);
             ATLASSERT(SUCCEEDED(hRes));
 
-            RegisterDialogClass(L"UWPSpy", hinstDLL);
+            RegisterDialogClass(L"Telegram.Diagnostics", hinstDLL);
         } break;
 
         case DLL_THREAD_ATTACH:
@@ -83,7 +83,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,  // handle to DLL module
             break;
 
         case DLL_PROCESS_DETACH:
-            UnregisterClass(L"UWPSpy", hinstDLL);
+            UnregisterClass(L"Telegram.Diagnostics", hinstDLL);
 
             _Module.Term();
             break;
@@ -118,12 +118,12 @@ HRESULT WINAPI start(DWORD pid, DWORD framework) {
 
             WCHAR windowClass[16];
             if (!GetClassName(hWnd, windowClass, ARRAYSIZE(windowClass)) ||
-                _wcsicmp(windowClass, L"UWPSpy") != 0) {
+                _wcsicmp(windowClass, L"Telegram.Diagnostics") != 0) {
                 return TRUE;
             }
 
-            //data.found = TRUE;
-            //PostMessage(hWnd, CMainDlg::UWM_ACTIVATE_WINDOW, 0, 0);
+            // data.found = TRUE;
+            // PostMessage(hWnd, CMainDlg::UWM_ACTIVATE_WINDOW, 0, 0);
             return TRUE;
         },
         reinterpret_cast<LPARAM>(&data));
@@ -173,7 +173,7 @@ BOOL WINAPI isDebugging(DWORD pid) {
 
             WCHAR windowClass[16];
             if (!GetClassName(hWnd, windowClass, ARRAYSIZE(windowClass)) ||
-                _wcsicmp(windowClass, L"UWPSpy") != 0) {
+                _wcsicmp(windowClass, L"Telegram.Diagnostics") != 0) {
                 return TRUE;
             }
 

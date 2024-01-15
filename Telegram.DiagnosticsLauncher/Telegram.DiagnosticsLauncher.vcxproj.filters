@@ -35,7 +35,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="UWPSpyLauncher.cpp">
+    <ClCompile Include="Telegram.DiagnosticsLauncher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
@@ -49,15 +49,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="UWPSpyLauncher.rc">
+    <ResourceCompile Include="Telegram.DiagnosticsLauncher.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="UWPSpyLauncher.ico">
+    <Image Include="Telegram.DiagnosticsLauncher.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\UWPSpyLauncher.ico">
+    <Image Include="res\Telegram.DiagnosticsLauncher.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

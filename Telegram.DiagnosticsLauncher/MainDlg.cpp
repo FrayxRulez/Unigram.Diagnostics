@@ -83,8 +83,8 @@ void CMainDlg::OnAppAbout(UINT uNotifyCode, int nID, CWindow wndCtl) {
         L"\n"
         L"By <A HREF=\"https://ramensoftware.com/\">Ramen Software</A>\n"
         L"\n"
-        L"<A HREF=\"https://ramensoftware.com/uwpspy\">Homepage</a>\n"
-        L"<A HREF=\"https://github.com/m417z/UWPSpy\">Source code</a>";
+        L"<A HREF=\"https://ramensoftware.com/Telegram.Diagnostics\">Homepage</a>\n"
+        L"<A HREF=\"https://github.com/m417z/Telegram.Diagnostics\">Source code</a>";
 
     TASKDIALOGCONFIG taskDialogConfig{
         .cbSize = sizeof(taskDialogConfig),
@@ -93,7 +93,7 @@ void CMainDlg::OnAppAbout(UINT uNotifyCode, int nID, CWindow wndCtl) {
         .dwFlags = TDF_ENABLE_HYPERLINKS | TDF_ALLOW_DIALOG_CANCELLATION,
         .pszWindowTitle = L"About",
         .pszMainIcon = MAKEINTRESOURCE(IDR_MAINFRAME),
-        .pszMainInstruction = L"UWPSpy v" VER_FILE_VERSION_WSTR,
+        .pszMainInstruction = L"Telegram.Diagnostics v" VER_FILE_VERSION_WSTR,
         .pszContent = content,
         .pfCallback = [](HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
                          LONG_PTR lpRefData) -> HRESULT {

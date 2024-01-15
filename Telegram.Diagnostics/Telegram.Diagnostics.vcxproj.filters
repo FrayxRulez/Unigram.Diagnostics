@@ -18,7 +18,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UWPSpy.cpp">
+    <ClCompile Include="Telegram.Diagnostics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="visualtreewatcher.cpp">

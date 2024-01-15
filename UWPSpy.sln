@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UWPSpy", "UWPSpy\UWPSpy.vcxproj", "{D5BFF041-D26D-4765-935E-BE0D0D4A6C99}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Telegram.Diagnostics", "Telegram.Diagnostics\Telegram.Diagnostics.vcxproj", "{D5BFF041-D26D-4765-935E-BE0D0D4A6C99}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UWPSpyLauncher", "UWPSpyLauncher\UWPSpyLauncher.vcxproj", "{590CB37A-8E25-4A5D-B358-DE4BAA08DB59}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Telegram.DiagnosticsLauncher", "Telegram.DiagnosticsLauncher\Telegram.DiagnosticsLauncher.vcxproj", "{590CB37A-8E25-4A5D-B358-DE4BAA08DB59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

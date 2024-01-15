@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by UWPSpyLauncher.rc
+// Used by Telegram.DiagnosticsLauncher.rc
 //
 #define IDR_MAINFRAME                   128
 #define IDD_MAINDLG                     129
