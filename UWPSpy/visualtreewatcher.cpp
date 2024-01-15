@@ -7,6 +7,17 @@
 
 #define EXTRA_DEBUG 0
 
+const std::wstring TO_MASTER_LONG =
+    L"RootPage/LayoutRoot (Grid)/Navigation (SplitView)/Grid/ContentRoot "
+    L"(Grid)/Border/Frame/ContentPresenter/";
+const std::wstring TO_MASTER_SHORT = L"RootPage/.../";
+
+const std::wstring TO_DETAIL_LONG =
+    L"MainPage/Grid/MasterDetail (MasterDetailView)/AdaptivePanel "
+    L"(MasterDetailPanel)/DetailHeaderPresenter2 (Grid)/DetailPresenter "
+    L"(Grid)/Frame/ContentPresenter/";
+const std::wstring TO_DETAIL_SHORT = L"MainPage/.../";
+
 VisualTreeWatcher::VisualTreeWatcher(winrt::com_ptr<IUnknown> site)
     : m_xamlDiagnostics(site.as<IXamlDiagnostics>()) {
     m_unhandledException = wux::Application::Current().UnhandledException(
@@ -187,6 +198,16 @@ inline void OutputDebugStringFormat(LPCWSTR pwhFormat, ...) {
     va_end(args);
 }
 
+inline bool Replace(std::wstring& str,
+                    const std::wstring& from,
+                    const std::wstring& to) {
+    size_t start_pos = str.find(from);
+    if (start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
+
 void VisualTreeWatcher::ElementAdded(
     const ParentChildRelation& parentChildRelation,
     const VisualElement& element) {
@@ -266,11 +287,18 @@ void VisualTreeWatcher::ElementRemoved(InstanceHandle handle) {
 }
 
 std::wstring VisualTreeWatcher::FindPathToRoot(InstanceHandle parent) {
+    auto path = FindPathToRootImpl(parent);
+    Replace(path, TO_MASTER_LONG, TO_MASTER_SHORT);
+    Replace(path, TO_DETAIL_LONG, TO_DETAIL_SHORT);
+    return path;
+}
+
+std::wstring VisualTreeWatcher::FindPathToRootImpl(InstanceHandle parent) {
     auto find = m_pathToRoot.find(parent);
     if (find != m_pathToRoot.end()) {
         auto path = m_childToParent.find(parent);
         if (path != m_childToParent.end()) {
-            return FindPathToRoot(path->second) + L"/" + find->second;
+            return FindPathToRootImpl(path->second) + L"/" + find->second;
         }
 
         return find->second;

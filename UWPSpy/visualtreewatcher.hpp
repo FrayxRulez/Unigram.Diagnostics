@@ -43,6 +43,7 @@ struct VisualTreeWatcher : winrt::implements<VisualTreeWatcher,
     void ElementRemoved(InstanceHandle handle);
 
     std::wstring FindPathToRoot(InstanceHandle parent);
+    std::wstring FindPathToRootImpl(InstanceHandle parent);
 
     winrt::com_ptr<IXamlDiagnostics> m_xamlDiagnostics;
 
