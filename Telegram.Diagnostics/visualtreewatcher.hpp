@@ -43,16 +43,28 @@ struct VisualTreeWatcher : winrt::implements<VisualTreeWatcher,
     void ElementRemoved(InstanceHandle handle);
 
     std::wstring FindPathToRoot(InstanceHandle parent);
-    std::wstring FindPathToRootImpl(InstanceHandle parent);
+    std::wstring FindPathToRootImpl(InstanceHandle parent,
+                                    unsigned int& numChildren);
 
     winrt::com_ptr<IXamlDiagnostics> m_xamlDiagnostics;
+
+    struct HistoryItem {
+        InstanceHandle handle;
+        std::wstring path;
+    };
+
+    struct ElementItem {
+        InstanceHandle parent;
+        std::wstring name;
+        unsigned int numChildren;
+        unsigned int childIndex;
+    };
 
     std::shared_mutex m_dlgMainMutex;
     wux::Application::UnhandledException_revoker m_unhandledException;
     std::unordered_map<InstanceHandle,
                        wux::FrameworkElement::SizeChanged_revoker>
         m_sizeChangedTokens;
-    std::unordered_map<InstanceHandle, std::wstring> m_pathToRoot;
-    std::unordered_map<InstanceHandle, InstanceHandle> m_childToParent;
-    std::deque<std::wstring> m_history;
+    std::unordered_map<InstanceHandle, ElementItem> m_elements;
+    std::deque<HistoryItem> m_history;
 };

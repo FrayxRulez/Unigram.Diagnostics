@@ -8,15 +8,44 @@
 #define EXTRA_DEBUG 0
 
 const std::wstring TO_MASTER_LONG =
-    L"RootPage/LayoutRoot (Grid)/Navigation (SplitView)/Grid/ContentRoot "
-    L"(Grid)/Border/Frame/ContentPresenter/";
+    L"RootPage/LayoutRoot (Grid)[0]/Navigation (SplitView)/Grid[1]/ContentRoot "
+    L"(Grid)[0]/Border/Frame/ContentPresenter/";
 const std::wstring TO_MASTER_SHORT = L"RootPage/.../";
 
 const std::wstring TO_DETAIL_LONG =
-    L"MainPage/Grid/MasterDetail (MasterDetailView)/AdaptivePanel "
-    L"(MasterDetailPanel)/DetailHeaderPresenter2 (Grid)/DetailPresenter "
+    L"MainPage/Grid[4]/MasterDetail (MasterDetailView)/AdaptivePanel "
+    L"(MasterDetailPanel)[1]/DetailHeaderPresenter2 (Grid)[3]/DetailPresenter "
     L"(Grid)/Frame/ContentPresenter/";
 const std::wstring TO_DETAIL_SHORT = L"MainPage/.../";
+
+const std::wstring TO_PIVOTITEM_LONG =
+    L"MainPage/Grid[4]/MasterDetail (MasterDetailView)/AdaptivePanel "
+    L"(MasterDetailPanel)[2]/MasterFrame "
+    L"(ContentControl)/ContentPresenter/Grid[1]/rpMasterTitlebar "
+    L"(Pivot)/RootElement (Grid)[1]/Grid/ScrollViewer "
+    L"(ScrollViewer)/Grid/ScrollContentPresenter "
+    L"(ScrollContentPresenter)/Panel (PivotPanel)/PivotLayoutElement "
+    L"(Grid)[5]/PivotItemPresenter (ItemsPresenter)/Grid/PivotItem";
+const std::wstring TO_PIVOTITEM_SHORT = L"MainPage/.../PivotItem";
+
+inline void OutputDebugStringFormat(LPCWSTR pwhFormat, ...) {
+    va_list args;
+    va_start(args, pwhFormat);
+    WCHAR buffer[1024];
+    vswprintf_s(buffer, 1024, pwhFormat, args);
+    OutputDebugStringW(buffer);
+    va_end(args);
+}
+
+inline bool Replace(std::wstring& str,
+                    const std::wstring& from,
+                    const std::wstring& to) {
+    size_t start_pos = str.find(from);
+    if (start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
 
 VisualTreeWatcher::VisualTreeWatcher(winrt::com_ptr<IUnknown> site)
     : m_xamlDiagnostics(site.as<IXamlDiagnostics>()) {
@@ -34,7 +63,12 @@ VisualTreeWatcher::VisualTreeWatcher(winrt::com_ptr<IUnknown> site)
                                  std::wofstream::out | std::wofstream::trunc);
 
                 for (auto& item : m_history) {
-                    f << item << L"\n";
+                    auto path = std::wstring(item.path);
+                    Replace(path, TO_MASTER_LONG, TO_MASTER_SHORT);
+                    Replace(path, TO_DETAIL_LONG, TO_DETAIL_SHORT);
+                    Replace(path, TO_PIVOTITEM_LONG, TO_PIVOTITEM_SHORT);
+                    f << path << L" 0x" << std::hex << item.handle
+                      << L"\n";
                 }
 
                 f.close();
@@ -189,25 +223,6 @@ HRESULT VisualTreeWatcher::OnElementStateChanged(InstanceHandle,
     return S_OK;
 }
 
-inline void OutputDebugStringFormat(LPCWSTR pwhFormat, ...) {
-    va_list args;
-    va_start(args, pwhFormat);
-    WCHAR buffer[1024];
-    vswprintf_s(buffer, 1024, pwhFormat, args);
-    OutputDebugStringW(buffer);
-    va_end(args);
-}
-
-inline bool Replace(std::wstring& str,
-                    const std::wstring& from,
-                    const std::wstring& to) {
-    size_t start_pos = str.find(from);
-    if (start_pos == std::string::npos)
-        return false;
-    str.replace(start_pos, from.length(), to);
-    return true;
-}
-
 void VisualTreeWatcher::ElementAdded(
     const ParentChildRelation& parentChildRelation,
     const VisualElement& element) {
@@ -240,7 +255,11 @@ void VisualTreeWatcher::ElementAdded(
             path += L")";
         }
 
-        m_pathToRoot[element.Handle] = path;
+        m_elements[element.Handle] =
+            ElementItem{.parent = parentChildRelation.Parent,
+                        .name = path,
+                        .numChildren = element.NumChildren,
+                        .childIndex = parentChildRelation.ChildIndex};
 
         if (!parentChildRelation.Parent) {
             return;
@@ -248,7 +267,6 @@ void VisualTreeWatcher::ElementAdded(
 
         auto handle = element.Handle;
 
-        m_childToParent[element.Handle] = parentChildRelation.Parent;
         m_sizeChangedTokens[element.Handle] = frameworkElement.SizeChanged(
             winrt::auto_revoke,
             [this, handle](IInspectable const& sender,
@@ -264,13 +282,13 @@ void VisualTreeWatcher::ElementAdded(
 
                     if (!m_history.empty()) {
                         const auto& peek = m_history.back();
-                        size_t index = path.find(peek);
-                        if (index == 0 && path.size() > peek.size()) {
+                        size_t index = path.find(peek.path);
+                        if (index == 0 && path.size() > peek.path.size()) {
                             m_history.pop_back();
                         }
                     }
 
-                    m_history.push_back(path);
+                    m_history.push_back({.handle = handle, .path = path});
 
                     while (200 < m_history.size()) {
                         m_history.pop_front();
@@ -281,28 +299,37 @@ void VisualTreeWatcher::ElementAdded(
 }
 
 void VisualTreeWatcher::ElementRemoved(InstanceHandle handle) {
-    m_pathToRoot.erase(handle);
-    m_childToParent.erase(handle);
+    m_elements.erase(handle);
     m_sizeChangedTokens.erase(handle);
 }
 
 std::wstring VisualTreeWatcher::FindPathToRoot(InstanceHandle parent) {
-    auto path = FindPathToRootImpl(parent);
-    Replace(path, TO_MASTER_LONG, TO_MASTER_SHORT);
-    Replace(path, TO_DETAIL_LONG, TO_DETAIL_SHORT);
+    unsigned int numChildren;
+    auto path = FindPathToRootImpl(parent, numChildren);
     return path;
 }
 
-std::wstring VisualTreeWatcher::FindPathToRootImpl(InstanceHandle parent) {
-    auto find = m_pathToRoot.find(parent);
-    if (find != m_pathToRoot.end()) {
-        auto path = m_childToParent.find(parent);
-        if (path != m_childToParent.end()) {
-            return FindPathToRootImpl(path->second) + L"/" + find->second;
+std::wstring VisualTreeWatcher::FindPathToRootImpl(InstanceHandle handle,
+                                                   unsigned int& numChildren) {
+    auto find = m_elements.find(handle);
+    if (find != m_elements.end()) {
+        std::wstring path = find->second.name;
+
+        if (find->second.parent) {
+            auto parent = FindPathToRootImpl(find->second.parent, numChildren);
+
+            if (numChildren > 1) {
+                parent +=
+                    L"[" + std::to_wstring(find->second.childIndex) + L"]";
+            }
+
+            path = parent + L"/" + path;
         }
 
-        return find->second;
+        numChildren = find->second.numChildren;
+        return path;
     }
 
+    numChildren = 0;
     return L"";
 }
